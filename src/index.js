@@ -9,7 +9,7 @@ import Account from './pages/Account'
 import Asset from './pages/Asset'
 import TransactionAlgo from './pages/TransactionAlgo'
 import TransactionASA from './pages/TransactionASA'
-import Orders from './pages/Orders'
+import LimitOrder from './pages/LimitOrder'
 
 class MainRouter extends React.Component {
   render() {
@@ -21,7 +21,7 @@ class MainRouter extends React.Component {
           <Route exact path={'/asset'} component={Asset} />
           <Route exact path={'/transaction-algo'} component={TransactionAlgo} />
           <Route exact path={'/transaction-asa'} component={TransactionASA} />
-          <Route exact path={'/orders'} component={Orders} />
+          <Route exact path={'/limit-order'} component={LimitOrder} />
         </Switch>
       </BrowserRouter>
     );

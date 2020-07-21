@@ -51,7 +51,7 @@ class NavFrame extends Component {
               </DropdownMenu>
             </Dropdown>
             <NavItem>
-              <NavLink href="/orders">Limit Order</NavLink>
+              <NavLink href="/limit-order">Limit Order</NavLink>
             </NavItem>
           </Nav>
         </Navbar>
