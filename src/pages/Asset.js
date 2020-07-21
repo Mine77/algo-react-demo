@@ -9,8 +9,7 @@ import {
     Label,
     Input,
     FormGroup,
-    FormText,
-    Col
+    FormText
 } from 'reactstrap';
 
 const algosdk = require('algosdk');
@@ -80,7 +79,7 @@ class Asset extends Component {
             event.target.totalIssuance.value,
             event.target.unitName.value,
             event.target.assetName.value,
-            event.target.assetUrl.name,
+            event.target.assetUrl.value,
             event.target.manager.value,
             event.target.reserve.value,
             event.target.freeze.value,
@@ -92,7 +91,7 @@ class Asset extends Component {
                 assetId: assetId
             })
             console.log("Asset ID:" + assetId);
-        })
+        }).catch(console.log);
     }
 
     render() {
@@ -102,6 +101,9 @@ class Asset extends Component {
                 <Jumbotron>
                     <Container>
                         <Row style={{ width: "500px" }}>
+                            <h2>
+                                Create Asset
+                            </h2>
                             <Form onSubmit={this.handleSubmit}>
                                 <FormGroup>
                                     <Label>Account Mnemonic</Label>
@@ -169,7 +171,7 @@ class Asset extends Component {
                                     {this.state.isLoading ? "Creating..." : "Create Asset"}
                                 </Button>
                             </Form>
-                            {this.state.showResult ? <p>Created Asset ID: {this.state.assetId}</p> : null}
+                            {this.state.showResult ? <p>Asset ID: <a href={"https://testnet.algoexplorer.io/asset/"+this.state.assetId} target="_blank">{this.state.assetId}</a></p> : null}
                         </Row>
                     </Container>
                 </Jumbotron>

@@ -3,7 +3,6 @@ import NavFrame from '../components/NavFrame';
 import {
     Container,
     Row,
-    Col,
     Jumbotron,
     Button,
     Form,
@@ -34,26 +33,24 @@ class Account extends Component {
                 <Jumbotron>
                     <Container>
                         <Row>
+                            <h2>
+                                Create Account
+                            </h2>
                             <Form>
-                                <Col>
-                                    <Button color="primary" onClick={this.generateWallet}>
-                                        Generate Account
+                                <FormGroup>
+                                    <Label for="Address">Address</Label>
+                                    <Input style={{ width: "700px" }} name="address" id="address" defaultValue={this.state.keys} />
+                                </FormGroup>
+
+                                <FormGroup>
+                                    <Label for="Mnemonic">Mnemonic</Label>
+                                    <Input style={{ width: "400px", height: "150px" }} type="textarea" name="mnemonic" id="mnemonic" defaultValue={this.state.mnemonic} />
+                                </FormGroup>
+                                <Button color="primary" onClick={this.generateWallet}>
+                                    Generate Account
                                 </Button>
-                                </Col>
-                                <Col>
-                                    <FormGroup>
-                                        <Label for="Address">Address</Label>
-                                        <Input style={{ width: "700px" }} name="address" id="address" value={this.state.keys} />
-                                    </FormGroup>
-                                </Col>
-                                <Col>
-                                    <FormGroup>
-                                        <Label for="Mnemonic">Mnemonic</Label>
-                                        <Input style={{ width: "400px", height: "150px" }} type="textarea" name="mnemonic" id="mnemonic" value={this.state.mnemonic} />
-                                    </FormGroup>
-                                </Col>
                             </Form>
-                            
+
                         </Row>
 
 
