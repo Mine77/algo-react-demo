@@ -12,84 +12,147 @@ import {
     FormText
 } from 'reactstrap';
 
+const algosdk = require('algosdk');
+const utility = require('../utility/utility');
+
 class Transaction extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            isLoading: false,
+            showResult: false,
+            txId: 0
+        };
+        // This binding is necessary to make `this` work in the callback
+        this.sendPaymentTransaction = this.sendPaymentTransaction.bind(this);
+        this.handleSubmitAlgo = this.handleSubmitAlgo.bind(this);
+    }
+    sendPaymentTransaction(mnemonic,to,amount) {
+        var p = new Promise(function (resolve, reject) {
+            const server = 'https://testnet-algorand.api.purestake.io/ps1';
+            const port = '';
+            const token = {
+                'X-API-Key': 'q6SxddUqMjGfyRwofxRp69DS98gsfmf2bCv8H9qd'
+            }
+            const algodclient = new algosdk.Algod(token, server, port);
+
+            var account = algosdk.mnemonicToSecretKey(mnemonic);
+            
+            utility.getChangingParms(algodclient).then((cp) => {
+                var txn = { 
+                    "to": to,
+                    "fee": cp.fee,
+                    "amount": parseInt(amount),
+                    "firstRound": cp.firstRound,
+                    "lastRound": cp.lastRound,
+                    "genesisID": cp.genID,
+                    "genesisHash": cp.genHash,
+                    "closeRemainderTo": undefined,
+                    "note": undefined
+                };
+                var signedTxn = algosdk.signTransaction(txn, account.sk);
+                console.log(signedTxn);
+                algodclient.sendRawTransaction(signedTxn.blob).then((tx) => {
+                    console.log(tx);
+                    console.log("Transaction : " + tx.txId);
+                    utility.waitForConfirmation(algodclient, tx.txId).then((msg) => {
+                        console.log(msg);
+                        algodclient.pendingTransactionInformation(tx.txId).then((ptx) => {
+                            resolve(tx.txId);
+                        }).catch(console.log)
+                    })
+                }).catch(console.log)
+            }).catch(console.log);
+        })
+        return p;
+    }
+    handleSubmitAlgo(event) {
+        event.preventDefault();
+        this.setState({
+            isLoading: true
+        })
+        this.sendPaymentTransaction(
+            event.target.accountMnemonic.value,
+            event.target.toAddress.value,
+            event.target.amount.value
+        ).then((txId) => {
+            this.setState({
+                isLoading: false,
+                showResult: true,
+                txId: txId
+            })
+            console.log("Transaction ID:" + txId);
+        }).catch(console.log);
+    }
     render() {
         return (
-<div>
+            <div>
                 <NavFrame></NavFrame>
                 <Jumbotron>
                     <Container>
                         <Row>
-                            <Form>
+                            <h2>
+                                Send ALGO Transaction
+                            </h2>
+                            <Form onSubmit={this.handleSubmitAlgo} style={{ width: "650px" }}>
                                 <FormGroup>
-                                    <Label for="exampleEmail">Email</Label>
-                                    <Input type="email" name="email" id="exampleEmail" placeholder="with a placeholder" />
-                                </FormGroup>
-                                <FormGroup>
-                                    <Label for="examplePassword">Password</Label>
-                                    <Input type="password" name="password" id="examplePassword" placeholder="password placeholder" />
-                                </FormGroup>
-                                <FormGroup>
-                                    <Label for="exampleSelect">Select</Label>
-                                    <Input type="select" name="select" id="exampleSelect">
-                                        <option>1</option>
-                                        <option>2</option>
-                                        <option>3</option>
-                                        <option>4</option>
-                                        <option>5</option>
-                                    </Input>
+                                    <Label>Account Mnemonic</Label>
+                                    <Input style={{ height: "100px" }} type="textarea" name="accountMnemonic" defaultValue="bench outdoor conduct easily pony normal memory boat tiger together catch toward submit web stomach insane other list clap grain photo excess crush absorb illness" />
+                                    <FormText color="muted">The account for sending the transaction.</FormText>
                                 </FormGroup>
                                 <FormGroup>
-                                    <Label for="exampleSelectMulti">Select Multiple</Label>
-                                    <Input type="select" name="selectMulti" id="exampleSelectMulti" multiple>
-                                        <option>1</option>
-                                        <option>2</option>
-                                        <option>3</option>
-                                        <option>4</option>
-                                        <option>5</option>
-                                    </Input>
+                                    <Label>To Address</Label>
+                                    <Input type="text" name="toAddress" defaultValue="B7K3C7ZOG5JMVMDZRUZ6HWWZYCXYBPNZADAP3MLTZE5MUA56DK4SU762M4" />
+                                    <FormText color="muted">Send ALGOs to this address.</FormText>
                                 </FormGroup>
                                 <FormGroup>
-                                    <Label for="exampleText">Text Area</Label>
-                                    <Input type="textarea" name="text" id="exampleText" />
+                                    <Label>Amount</Label>
+                                    <Input type="text" pattern="[0-9]*" name="amount" defaultValue="1234567" />
+                                    <FormText color="muted">Amount of microALGOs to send.</FormText>
                                 </FormGroup>
-                                <FormGroup>
-                                    <Label for="exampleFile">File</Label>
-                                    <Input type="file" name="file" id="exampleFile" />
-                                    <FormText color="muted">
-                                        This is some placeholder block-level help text for the above input.
-                                        It's a bit lighter and easily wraps to a new line.
-        </FormText>
-                                </FormGroup>
-                                <FormGroup tag="fieldset">
-                                    <legend>Radio Buttons</legend>
-                                    <FormGroup check>
-                                        <Label check>
-                                            <Input type="radio" name="radio1" />{' '}
-            Option one is this and that—be sure to include why it's great
-          </Label>
-                                    </FormGroup>
-                                    <FormGroup check>
-                                        <Label check>
-                                            <Input type="radio" name="radio1" />{' '}
-            Option two can be something else and selecting it will deselect option one
-          </Label>
-                                    </FormGroup>
-                                    <FormGroup check disabled>
-                                        <Label check>
-                                            <Input type="radio" name="radio1" disabled />{' '}
-            Option three is disabled
-          </Label>
-                                    </FormGroup>
-                                </FormGroup>
-                                <FormGroup check>
-                                    <Label check>
-                                        <Input type="checkbox" />{' '}
-          Check me out
-        </Label>
-                                </FormGroup>
-                                <Button>Submit</Button>
+                                <Button
+                                    color={this.state.isLoading ? "secondary" : "primary"}
+                                    disabled={this.state.isLoading}
+                                    type="submit"
+                                >
+                                    {this.state.isLoading ? "Creating..." : "Send Transaction"}
+                                </Button>
                             </Form>
+                            {this.state.showResult ? <p>Transaction ID: <a href={"https://testnet.algoexplorer.io/tx/"+this.state.txId} target="_blank">{this.state.txId}</a></p> : null}
+                        </Row>
+                    </Container>
+                </Jumbotron>
+                <Jumbotron>
+                    <Container>
+                        <Row>
+                            <h2>
+                                Send ASA Transaction
+                            </h2>
+                            <Form onSubmit={this.handleSubmitASA} style={{ width: "650px" }}>
+                                <FormGroup>
+                                    <Label>Account Mnemonic</Label>
+                                    <Input style={{ height: "100px" }} type="textarea" name="accountMnemonic" defaultValue="bench outdoor conduct easily pony normal memory boat tiger together catch toward submit web stomach insane other list clap grain photo excess crush absorb illness" />
+                                    <FormText color="muted">The account for sending the transaction.</FormText>
+                                </FormGroup>
+                                <FormGroup>
+                                    <Label>To Address</Label>
+                                    <Input type="text" name="toAddress" defaultValue="B7K3C7ZOG5JMVMDZRUZ6HWWZYCXYBPNZADAP3MLTZE5MUA56DK4SU762M4" />
+                                    <FormText color="muted">Send ALGOs to this address.</FormText>
+                                </FormGroup>
+                                <FormGroup>
+                                    <Label>Amount</Label>
+                                    <Input type="text" pattern="[0-9]*" name="amount" defaultValue="1234567" />
+                                    <FormText color="muted">Amount of microALGOs to send.</FormText>
+                                </FormGroup>
+                                <Button
+                                    color={this.state.isLoading ? "secondary" : "primary"}
+                                    disabled={this.state.isLoading}
+                                    type="submit"
+                                >
+                                    {this.state.isLoading ? "Creating..." : "Send Transaction"}
+                                </Button>
+                            </Form>
+                            {this.state.showResult ? <p>Transaction ID: <a href={"https://testnet.algoexplorer.io/tx/"+this.state.txId} target="_blank">{this.state.txId}</a></p> : null}
                         </Row>
                     </Container>
                 </Jumbotron>
@@ -99,3 +162,4 @@ class Transaction extends Component {
 }
 
 export default Transaction;
+
