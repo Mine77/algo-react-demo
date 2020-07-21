@@ -3,16 +3,29 @@ import NavFrame from '../components/NavFrame';
 import {
     Container,
     Row,
+    Col,
     Jumbotron,
     Button,
     Form,
     Label,
     Input,
     FormGroup,
-    FormText
 } from 'reactstrap';
+const algosdk = require('algosdk');
+
 
 class Account extends Component {
+    constructor(props) {
+        super(props);
+        this.state = { keys: '', mnemonic: '' };
+        // This binding is necessary to make `this` work in the callback
+        this.generateWallet = this.generateWallet.bind(this);
+    }
+    generateWallet() {
+        var keys = algosdk.generateAccount();
+        var mnemonic = algosdk.secretKeyToMnemonic(keys.sk);
+        this.setState({ keys: keys.addr, mnemonic: mnemonic });
+    }
     render() {
         return (
             <div>
@@ -21,76 +34,28 @@ class Account extends Component {
                     <Container>
                         <Row>
                             <Form>
-                                <FormGroup>
-                                    <Label for="exampleEmail">Email</Label>
-                                    <Input type="email" name="email" id="exampleEmail" placeholder="with a placeholder" />
-                                </FormGroup>
-                                <FormGroup>
-                                    <Label for="examplePassword">Password</Label>
-                                    <Input type="password" name="password" id="examplePassword" placeholder="password placeholder" />
-                                </FormGroup>
-                                <FormGroup>
-                                    <Label for="exampleSelect">Select</Label>
-                                    <Input type="select" name="select" id="exampleSelect">
-                                        <option>1</option>
-                                        <option>2</option>
-                                        <option>3</option>
-                                        <option>4</option>
-                                        <option>5</option>
-                                    </Input>
-                                </FormGroup>
-                                <FormGroup>
-                                    <Label for="exampleSelectMulti">Select Multiple</Label>
-                                    <Input type="select" name="selectMulti" id="exampleSelectMulti" multiple>
-                                        <option>1</option>
-                                        <option>2</option>
-                                        <option>3</option>
-                                        <option>4</option>
-                                        <option>5</option>
-                                    </Input>
-                                </FormGroup>
-                                <FormGroup>
-                                    <Label for="exampleText">Text Area</Label>
-                                    <Input type="textarea" name="text" id="exampleText" />
-                                </FormGroup>
-                                <FormGroup>
-                                    <Label for="exampleFile">File</Label>
-                                    <Input type="file" name="file" id="exampleFile" />
-                                    <FormText color="muted">
-                                        This is some placeholder block-level help text for the above input.
-                                        It's a bit lighter and easily wraps to a new line.
-        </FormText>
-                                </FormGroup>
-                                <FormGroup tag="fieldset">
-                                    <legend>Radio Buttons</legend>
-                                    <FormGroup check>
-                                        <Label check>
-                                            <Input type="radio" name="radio1" />{' '}
-            Option one is this and that—be sure to include why it's great
-          </Label>
+                                <Col>
+                                    <Button color="primary" onClick={this.generateWallet}>
+                                        Generate Account
+                                </Button>
+                                </Col>
+                                <Col>
+                                    <FormGroup>
+                                        <Label for="Address">Address</Label>
+                                        <Input style={{ width: "700px" }} name="address" id="address" value={this.state.keys} />
                                     </FormGroup>
-                                    <FormGroup check>
-                                        <Label check>
-                                            <Input type="radio" name="radio1" />{' '}
-            Option two can be something else and selecting it will deselect option one
-          </Label>
+                                </Col>
+                                <Col>
+                                    <FormGroup>
+                                        <Label for="Mnemonic">Mnemonic</Label>
+                                        <Input style={{ width: "400px", height: "150px" }} type="textarea" name="mnemonic" id="mnemonic" value={this.state.mnemonic} />
                                     </FormGroup>
-                                    <FormGroup check disabled>
-                                        <Label check>
-                                            <Input type="radio" name="radio1" disabled />{' '}
-            Option three is disabled
-          </Label>
-                                    </FormGroup>
-                                </FormGroup>
-                                <FormGroup check>
-                                    <Label check>
-                                        <Input type="checkbox" />{' '}
-          Check me out
-        </Label>
-                                </FormGroup>
-                                <Button>Submit</Button>
+                                </Col>
                             </Form>
+                            
                         </Row>
+
+
                     </Container>
                 </Jumbotron>
             </div>
