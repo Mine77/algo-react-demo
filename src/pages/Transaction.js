@@ -29,12 +29,7 @@ class Transaction extends Component {
     }
     sendPaymentTransaction(mnemonic,to,amount) {
         var p = new Promise(function (resolve, reject) {
-            const server = 'https://testnet-algorand.api.purestake.io/ps1';
-            const port = '';
-            const token = {
-                'X-API-Key': 'q6SxddUqMjGfyRwofxRp69DS98gsfmf2bCv8H9qd'
-            }
-            const algodclient = new algosdk.Algod(token, server, port);
+            const algodclient = utility.algodclient;
 
             var account = algosdk.mnemonicToSecretKey(mnemonic);
             

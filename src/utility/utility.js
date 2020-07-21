@@ -1,3 +1,13 @@
+const algosdk = require('algosdk');
+
+const server = 'https://testnet-algorand.api.purestake.io/ps1';
+const port = '';
+const token = {
+    'X-API-Key': 'q6SxddUqMjGfyRwofxRp69DS98gsfmf2bCv8H9qd'
+}
+
+const algodclient = new algosdk.Algod(token, server, port);
+
 // Structure for changing blockchain params
 const chainParams = {
     fee: 0,
@@ -37,12 +47,13 @@ const waitForConfirmation = (algodclient, txId) => {
                 }
             }).catch(console.log);
         }, 2000);
-        
+
     });
     return p;
 }
 
-module.exports={
+module.exports = {
     getChangingParms,
-    waitForConfirmation
+    waitForConfirmation,
+    algodclient
 }

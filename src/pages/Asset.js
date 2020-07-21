@@ -29,12 +29,7 @@ class Asset extends Component {
     }
     createAsset(mnemonic, defaultFrozen, decimals, totalIssuance, unitName, assetName, assetUrl, manager, reserve, freeze, clawback) {
         var p = new Promise(function (resolve, reject) {
-            const server = 'https://testnet-algorand.api.purestake.io/ps1';
-            const port = '';
-            const token = {
-                'X-API-Key': 'q6SxddUqMjGfyRwofxRp69DS98gsfmf2bCv8H9qd'
-            }
-            const algodclient = new algosdk.Algod(token, server, port);
+            const algodclient = utility.algodclient;
 
             var account = algosdk.mnemonicToSecretKey(mnemonic);
             let addr = account.addr;
@@ -100,14 +95,14 @@ class Asset extends Component {
                 <NavFrame></NavFrame>
                 <Jumbotron>
                     <Container>
-                        <Row style={{ width: "500px" }}>
+                        <Row>
                             <h2>
                                 Create Asset
                             </h2>
-                            <Form onSubmit={this.handleSubmit}>
+                            <Form onSubmit={this.handleSubmit} style={{ width: "650px" }}>
                                 <FormGroup>
                                     <Label>Account Mnemonic</Label>
-                                    <Input style={{ height: "120px" }} type="textarea" name="accountMnemonic" defaultValue="bench outdoor conduct easily pony normal memory boat tiger together catch toward submit web stomach insane other list clap grain photo excess crush absorb illness" />
+                                    <Input style={{ height: "100px" }} type="textarea" name="accountMnemonic" defaultValue="bench outdoor conduct easily pony normal memory boat tiger together catch toward submit web stomach insane other list clap grain photo excess crush absorb illness" />
                                     <FormText color="muted">The account for sending the transaction.</FormText>
                                 </FormGroup>
                                 <FormGroup>
