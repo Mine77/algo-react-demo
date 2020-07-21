@@ -24,32 +24,28 @@ class TransactionASA extends Component {
             txId: 0
         };
         // This binding is necessary to make `this` work in the callback
-        this.sendPaymentTransaction = this.sendPaymentTransaction.bind(this);
-        this.handleSubmitAlgo = this.handleSubmitAlgo.bind(this);
+        this.sendAssetTransaction = this.sendAssetTransaction.bind(this);
+        this.handleSubmitASA = this.handleSubmitASA.bind(this);
     }
 
-    sendPaymentTransaction(mnemonic,to,amount) {
+    sendAssetTransaction(mnemonic,to,assetID,amount) {
         var p = new Promise(function (resolve, reject) {
             const algodclient = utility.algodclient;
 
             var account = algosdk.mnemonicToSecretKey(mnemonic);
             
             utility.getChangingParms(algodclient).then((cp) => {
-                var txn = { 
-                    "to": to,
-                    "fee": cp.fee,
-                    "amount": parseInt(amount),
-                    "firstRound": cp.firstRound,
-                    "lastRound": cp.lastRound,
-                    "genesisID": cp.genID,
-                    "genesisHash": cp.genHash,
-                    "closeRemainderTo": undefined,
-                    "note": undefined
-                };
-                var signedTxn = algosdk.signTransaction(txn, account.sk);
-                console.log(signedTxn);
-                algodclient.sendRawTransaction(signedTxn.blob).then((tx) => {
-                    console.log(tx);
+                 assetID = parseInt(assetID);
+                let note = undefined;
+                let sender = account.addr;
+                let recipient = to;
+                let revocationTarget = undefined;
+                let closeRemainderTo = undefined;
+                amount = parseInt(amount);
+                let opttxn = algosdk.makeAssetTransferTxn(sender, recipient, closeRemainderTo, revocationTarget,
+                    cp.fee, amount, cp.firstRound, cp.lastRound, note, cp.genHash, cp.genID, assetID);
+                var rawSignedTxn = opttxn.signTxn(account.sk);
+                algodclient.sendRawTransaction(rawSignedTxn).then((tx) => {
                     console.log("Transaction : " + tx.txId);
                     utility.waitForConfirmation(algodclient, tx.txId).then((msg) => {
                         console.log(msg);
@@ -63,14 +59,15 @@ class TransactionASA extends Component {
         return p;
     }
 
-    handleSubmitAlgo(event) {
+    handleSubmitASA(event) {
         event.preventDefault();
         this.setState({
             isLoading: true
         })
-        this.sendPaymentTransaction(
+        this.sendAssetTransaction(
             event.target.accountMnemonic.value,
             event.target.toAddress.value,
+            event.target.assetID.value,
             event.target.amount.value
         ).then((txId) => {
             this.setState({
@@ -92,21 +89,27 @@ class TransactionASA extends Component {
                             <h2>
                                 Send ASA Transaction
                             </h2>
-                            <Form onSubmit={this.handleSubmitAlgo} style={{ width: "650px" }}>
+                            <h5><small>To Opt-In for an asset, send an ASA transaction to the address itself with an amount of 0.</small></h5>
+                            <Form onSubmit={this.handleSubmitASA} style={{ width: "650px" }}>
                                 <FormGroup>
                                     <Label>Account Mnemonic</Label>
-                                    <Input style={{ height: "100px" }} type="textarea" name="accountMnemonic" defaultValue="bench outdoor conduct easily pony normal memory boat tiger together catch toward submit web stomach insane other list clap grain photo excess crush absorb illness" />
+                                    <Input style={{ height: "100px" }} type="textarea" name="accountMnemonic" defaultValue="road pigeon recipe process tube voyage syrup favorite near harvest upset survey baby maze all hamster peace define human foil hurdle sponsor panda absorb lamp" />
                                     <FormText color="muted">The account for sending the transaction.</FormText>
                                 </FormGroup>
                                 <FormGroup>
                                     <Label>To Address</Label>
                                     <Input type="text" name="toAddress" defaultValue="B7K3C7ZOG5JMVMDZRUZ6HWWZYCXYBPNZADAP3MLTZE5MUA56DK4SU762M4" />
-                                    <FormText color="muted">Send ALGOs to this address.</FormText>
+                                    <FormText color="muted">Send assets to this address.</FormText>
+                                </FormGroup>
+                                <FormGroup>
+                                    <Label>Asset ID</Label>
+                                    <Input type="text" pattern="[0-9]*" name="assetID" defaultValue="10842753" />
+                                    <FormText color="muted">The ID of the asset to send.</FormText>
                                 </FormGroup>
                                 <FormGroup>
                                     <Label>Amount</Label>
-                                    <Input type="text" pattern="[0-9]*" name="amount" defaultValue="1234567" />
-                                    <FormText color="muted">Amount of microALGOs to send.</FormText>
+                                    <Input type="text" pattern="[0-9]*" name="amount" defaultValue="0" />
+                                    <FormText color="muted">Amount of assets to send.</FormText>
                                 </FormGroup>
                                 <Button
                                     color={this.state.isLoading ? "secondary" : "primary"}
@@ -126,4 +129,3 @@ class TransactionASA extends Component {
 }
 
 export default TransactionASA;
-

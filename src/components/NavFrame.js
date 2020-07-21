@@ -47,7 +47,6 @@ class NavFrame extends Component {
           </DropdownToggle>
               <DropdownMenu>
                 <DropdownItem href="/transaction-algo">Algo Payment Transaction</DropdownItem>
-                <DropdownItem href="/transaction-optin">Opt-In Transaction</DropdownItem>
                 <DropdownItem href="/transaction-asa">ASA Transaction</DropdownItem>
               </DropdownMenu>
             </Dropdown>

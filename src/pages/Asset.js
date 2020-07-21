@@ -120,7 +120,7 @@ class Asset extends Component {
                                 </FormGroup>
                                 <FormGroup>
                                     <Label>Total Issuance</Label>
-                                    <Input type="text" pattern="[0-9]*" name="totalIssuance" defaultValue="1000" />
+                                    <Input type="text" pattern="[0-9]*" name="totalIssuance" defaultValue="100000" />
                                     <FormText color="muted">Total number of this asset available for circulation.</FormText>
                                 </FormGroup>
                                 <FormGroup>

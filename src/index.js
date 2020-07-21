@@ -8,7 +8,6 @@ import App from './App';
 import Account from './pages/Account'
 import Asset from './pages/Asset'
 import TransactionAlgo from './pages/TransactionAlgo'
-import TransactionOptIn from './pages/TransactionOptIn'
 import TransactionASA from './pages/TransactionASA'
 import Orders from './pages/Orders'
 
@@ -21,7 +20,6 @@ class MainRouter extends React.Component {
           <Route exact path={'/account'} component={Account} />
           <Route exact path={'/asset'} component={Asset} />
           <Route exact path={'/transaction-algo'} component={TransactionAlgo} />
-          <Route exact path={'/transaction-optin'} component={TransactionOptIn} />
           <Route exact path={'/transaction-asa'} component={TransactionASA} />
           <Route exact path={'/orders'} component={Orders} />
         </Switch>
