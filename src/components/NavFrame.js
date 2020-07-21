@@ -14,10 +14,13 @@ class NavFrame extends Component {
     return (
         <div>
           <Navbar color="inverse" light expand="md">
-            <NavbarBrand href="/">Algorand Limit Order Demo</NavbarBrand>
+            <NavbarBrand href="/">Algorand Limit Order React Demo</NavbarBrand>
             <Nav className="ml-auto" navbar>
               <NavItem>
                 <NavLink href="/account">Create Account</NavLink>
+              </NavItem>
+              <NavItem>
+                <NavLink href="https://bank.testnet.algorand.network/" target="_blank">Fund Account</NavLink>
               </NavItem>
               <NavItem>
                 <NavLink href="/asset">Create Asset</NavLink>
