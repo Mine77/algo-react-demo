@@ -1,12 +1,34 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
 import * as serviceWorker from './serviceWorker';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import App from './App';
+import Account from './pages/Account'
+import Asset from './pages/Asset'
+import Transaction from './pages/Transaction'
+import Orders from './pages/Orders'
+
+class MainRouter extends React.Component {
+  render() {
+    return (
+      <BrowserRouter>
+        <Switch>
+          <Route exact path={'/'} component={App} />
+          <Route exact path={'/account'} component={Account} />
+          <Route exact path={'/asset'} component={Asset} />
+          <Route exact path={'/transaction'} component={Transaction} />
+          <Route exact path={'/orders'} component={Orders} />
+        </Switch>
+      </BrowserRouter>
+    );
+  }
+}
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <MainRouter/>,
   </React.StrictMode>,
   document.getElementById('root')
 );
