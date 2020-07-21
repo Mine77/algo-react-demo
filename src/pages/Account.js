@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import NavFrame from '../components/NavFrame';
 import {
     Container,
-    Row,
+    Col,
     Jumbotron,
     Button,
     Form,
@@ -32,7 +32,7 @@ class Account extends Component {
                 <NavFrame></NavFrame>
                 <Jumbotron>
                     <Container>
-                        <Row>
+                        <Col>
                             <h2>
                                 Create Account
                             </h2>
@@ -51,7 +51,7 @@ class Account extends Component {
                                 </Button>
                             </Form>
 
-                        </Row>
+                        </Col>
 
 
                     </Container>

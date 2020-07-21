@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import NavFrame from '../components/NavFrame';
 import {
     Container,
-    Row,
+    Col,
     Jumbotron,
     Button,
     Form,
@@ -95,7 +95,7 @@ class Asset extends Component {
                 <NavFrame></NavFrame>
                 <Jumbotron>
                     <Container>
-                        <Row>
+                        <Col>
                             <h2>
                                 Create Asset
                             </h2>
@@ -166,8 +166,8 @@ class Asset extends Component {
                                     {this.state.isLoading ? "Creating..." : "Create Asset"}
                                 </Button>
                             </Form>
-                            {this.state.showResult ? <p>Asset ID: <a href={"https://testnet.algoexplorer.io/asset/"+this.state.assetId} target="_blank">{this.state.assetId}</a></p> : null}
-                        </Row>
+                            {this.state.showResult ? <p>Asset ID: <a href={"https://testnet.algoexplorer.io/asset/"+this.state.assetId} target="_blank" rel="noopener noreferrer">{this.state.assetId}</a></p> : null}
+                        </Col>
                     </Container>
                 </Jumbotron>
             </div>
