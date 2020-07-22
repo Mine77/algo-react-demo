@@ -12,8 +12,7 @@ import {
     FormText
 } from 'reactstrap';
 
-const algosdk = require('algosdk');
-const utility = require('../utility/utility');
+const algo = require('../utility/algo');
 
 class TransactionASA extends Component {
     constructor(props) {
@@ -24,39 +23,7 @@ class TransactionASA extends Component {
             txId: 0
         };
         // This binding is necessary to make `this` work in the callback
-        this.sendAssetTransaction = this.sendAssetTransaction.bind(this);
         this.handleSubmitASA = this.handleSubmitASA.bind(this);
-    }
-
-    sendAssetTransaction(mnemonic,to,assetID,amount) {
-        var p = new Promise(function (resolve, reject) {
-            const algodclient = utility.algodclient;
-
-            var account = algosdk.mnemonicToSecretKey(mnemonic);
-            
-            utility.getChangingParms(algodclient).then((cp) => {
-                 assetID = parseInt(assetID);
-                let note = undefined;
-                let sender = account.addr;
-                let recipient = to;
-                let revocationTarget = undefined;
-                let closeRemainderTo = undefined;
-                amount = parseInt(amount);
-                let opttxn = algosdk.makeAssetTransferTxn(sender, recipient, closeRemainderTo, revocationTarget,
-                    cp.fee, amount, cp.firstRound, cp.lastRound, note, cp.genHash, cp.genID, assetID);
-                var rawSignedTxn = opttxn.signTxn(account.sk);
-                algodclient.sendRawTransaction(rawSignedTxn).then((tx) => {
-                    console.log("Transaction : " + tx.txId);
-                    utility.waitForConfirmation(algodclient, tx.txId).then((msg) => {
-                        console.log(msg);
-                        algodclient.pendingTransactionInformation(tx.txId).then((ptx) => {
-                            resolve(tx.txId);
-                        }).catch(console.log)
-                    })
-                }).catch(console.log)
-            }).catch(console.log);
-        })
-        return p;
     }
 
     handleSubmitASA(event) {
@@ -64,7 +31,7 @@ class TransactionASA extends Component {
         this.setState({
             isLoading: true
         })
-        this.sendAssetTransaction(
+        algo.sendAssetTransaction(
             event.target.accountMnemonic.value,
             event.target.toAddress.value,
             event.target.assetID.value,
@@ -116,7 +83,7 @@ class TransactionASA extends Component {
                                     disabled={this.state.isLoading}
                                     type="submit"
                                 >
-                                    {this.state.isLoading ? "Creating..." : "Send Transaction"}
+                                    {this.state.isLoading ? "Sending..." : "Send Transaction"}
                                 </Button>
                             </Form>
                             {this.state.showResult ? <p>Transaction ID: <a href={"https://testnet.algoexplorer.io/tx/"+this.state.txId} target="_blank" rel="noopener noreferrer">{this.state.txId}</a></p> : null}

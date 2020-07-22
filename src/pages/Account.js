@@ -11,21 +11,25 @@ import {
     FormGroup,
 } from 'reactstrap';
 
-const algosdk = require('algosdk');
+const algo = require('../utility/algo')
 
 
 class Account extends Component {
     constructor(props) {
         super(props);
-        this.state = { keys: '', mnemonic: '' };
+        this.state = { address: '', mnemonic: '' };
         // This binding is necessary to make `this` work in the callback
-        this.generateWallet = this.generateWallet.bind(this);
+        this.handleClick = this.handleClick.bind(this);
     }
-    generateWallet() {
-        var keys = algosdk.generateAccount();
-        var mnemonic = algosdk.secretKeyToMnemonic(keys.sk);
-        this.setState({ keys: keys.addr, mnemonic: mnemonic });
+
+    handleClick() {
+        var wallet = algo.generateWallet();
+        this.setState({
+            address: wallet.account.addr,
+            mnemonic: wallet.mnemonic
+        })
     }
+
     render() {
         return (
             <div>
@@ -39,14 +43,14 @@ class Account extends Component {
                             <Form>
                                 <FormGroup>
                                     <Label for="Address">Address</Label>
-                                    <Input style={{ width: "700px" }} name="address" id="address" defaultValue={this.state.keys} />
+                                    <Input style={{ width: "700px" }} name="address" id="address" defaultValue={this.state.address} />
                                 </FormGroup>
 
                                 <FormGroup>
                                     <Label for="Mnemonic">Mnemonic</Label>
                                     <Input style={{ width: "400px", height: "150px" }} type="textarea" name="mnemonic" id="mnemonic" defaultValue={this.state.mnemonic} />
                                 </FormGroup>
-                                <Button color="primary" onClick={this.generateWallet}>
+                                <Button color="primary" onClick={this.handleClick}>
                                     Generate Account
                                 </Button>
                             </Form>

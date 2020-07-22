@@ -12,8 +12,7 @@ import {
     FormText
 } from 'reactstrap';
 
-const algosdk = require('algosdk');
-const utility = require('../utility/utility');
+const algo = require('../utility/algo');
 
 class TransactionAlgo extends Component {
     constructor(props) {
@@ -21,46 +20,12 @@ class TransactionAlgo extends Component {
         this.state = {
             isLoading: false,
             showResult: false,
-            txId: 0
+            txId: 0,
+            showError: false,
+            errMsg: ""
         };
         // This binding is necessary to make `this` work in the callback
-        this.sendPaymentTransaction = this.sendPaymentTransaction.bind(this);
         this.handleSubmitAlgo = this.handleSubmitAlgo.bind(this);
-    }
-
-    sendPaymentTransaction(mnemonic,to,amount) {
-        var p = new Promise(function (resolve, reject) {
-            const algodclient = utility.algodclient;
-
-            var account = algosdk.mnemonicToSecretKey(mnemonic);
-            
-            utility.getChangingParms(algodclient).then((cp) => {
-                var txn = { 
-                    "to": to,
-                    "fee": cp.fee,
-                    "amount": parseInt(amount),
-                    "firstRound": cp.firstRound,
-                    "lastRound": cp.lastRound,
-                    "genesisID": cp.genID,
-                    "genesisHash": cp.genHash,
-                    "closeRemainderTo": undefined,
-                    "note": undefined
-                };
-                var signedTxn = algosdk.signTransaction(txn, account.sk);
-                console.log(signedTxn);
-                algodclient.sendRawTransaction(signedTxn.blob).then((tx) => {
-                    console.log(tx);
-                    console.log("Transaction : " + tx.txId);
-                    utility.waitForConfirmation(algodclient, tx.txId).then((msg) => {
-                        console.log(msg);
-                        algodclient.pendingTransactionInformation(tx.txId).then((ptx) => {
-                            resolve(tx.txId);
-                        }).catch(console.log)
-                    })
-                }).catch(console.log)
-            }).catch(console.log);
-        })
-        return p;
     }
 
     handleSubmitAlgo(event) {
@@ -68,7 +33,7 @@ class TransactionAlgo extends Component {
         this.setState({
             isLoading: true
         })
-        this.sendPaymentTransaction(
+        algo.sendPaymentTransaction(
             event.target.accountMnemonic.value,
             event.target.toAddress.value,
             event.target.amount.value
@@ -112,7 +77,7 @@ class TransactionAlgo extends Component {
                                     disabled={this.state.isLoading}
                                     type="submit"
                                 >
-                                    {this.state.isLoading ? "Creating..." : "Send Transaction"}
+                                    {this.state.isLoading ? "Sending..." : "Send Transaction"}
                                 </Button>
                             </Form>
                             {this.state.showResult ? <p>Transaction ID: <a href={"https://testnet.algoexplorer.io/tx/"+this.state.txId} target="_blank" rel="noopener noreferrer">{this.state.txId}</a></p> : null}

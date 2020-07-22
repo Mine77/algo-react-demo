@@ -38,14 +38,12 @@ class NavFrame extends Component {
             <NavItem>
               <NavLink href="https://bank.testnet.algorand.network/" target="_blank" rel="noopener noreferrer">Fund Account</NavLink>
             </NavItem>
-            <NavItem>
-              <NavLink href="/asset">Create Asset</NavLink>
-            </NavItem>
             <Dropdown nav isOpen={this.state.dropdownOpen} toggle={this.toggle}>
               <DropdownToggle nav caret>
                 Send Transaction
           </DropdownToggle>
               <DropdownMenu>
+                <DropdownItem href="/asset">Create Asset</DropdownItem>
                 <DropdownItem href="/transaction-algo">Algo Payment Transaction</DropdownItem>
                 <DropdownItem href="/transaction-asa">ASA Transaction</DropdownItem>
               </DropdownMenu>

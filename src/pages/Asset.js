@@ -12,8 +12,7 @@ import {
     FormText
 } from 'reactstrap';
 
-const algosdk = require('algosdk');
-const utility = require('../utility/utility');
+const algo = require("../utility/algo")
 
 class Asset extends Component {
     constructor(props) {
@@ -21,53 +20,20 @@ class Asset extends Component {
         this.state = {
             isLoading: false,
             showResult: false,
-            assetId: 0
+            assetId: 0,
+            showError: false,
+            errMsg: ""
         };
         // This binding is necessary to make `this` work in the callback
-        this.createAsset = this.createAsset.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
     }
-    createAsset(mnemonic, defaultFrozen, decimals, totalIssuance, unitName, assetName, assetUrl, manager, reserve, freeze, clawback) {
-        var p = new Promise(function (resolve, reject) {
-            const algodclient = utility.algodclient;
 
-            var account = algosdk.mnemonicToSecretKey(mnemonic);
-            let addr = account.addr;
-            if (defaultFrozen === "Yes")
-                defaultFrozen = true;
-            else
-                defaultFrozen = false;
-            decimals = parseInt(decimals);
-            totalIssuance = parseInt(totalIssuance);
-            let assetMetadataHash = "16efaa3924a6fd9d3a4824799a4ac65d"; // Optional hash commitment of some sort relating to the asset. 32 character length.
-            utility.getChangingParms(algodclient).then((cp) => {
-                let note = undefined; // arbitrary data to be stored in the transaction; here, none is stored
-                // signing and sending "txn" allows "addr" to create an asset
-                let txn = algosdk.makeAssetCreateTxn(addr, cp.fee, cp.firstRound, cp.lastRound, note,
-                    cp.genHash, cp.genID, totalIssuance, decimals, defaultFrozen, manager, reserve, freeze,
-                    clawback, unitName, assetName, assetUrl, assetMetadataHash);
-                let rawSignedTxn = txn.signTxn(account.sk);
-                algodclient.sendRawTransaction(rawSignedTxn).then((tx) => {
-                    console.log("Transaction : " + tx.txId);
-                    let assetID = null;
-                    utility.waitForConfirmation(algodclient, tx.txId).then((msg) => {
-                        console.log(msg);
-                        algodclient.pendingTransactionInformation(tx.txId).then((ptx) => {
-                            assetID = ptx.txresults.createdasset;
-                            resolve(assetID);
-                        }).catch(console.log)
-                    })
-                }).catch(console.log)
-            }).catch(console.log);
-        })
-        return p;
-    }
     handleSubmit(event) {
         event.preventDefault();
         this.setState({
             isLoading: true
         })
-        this.createAsset(
+        algo.createAsset(
             event.target.accountMnemonic.value,
             event.target.defaultFrozen.value,
             event.target.decimals.value,
@@ -85,8 +51,13 @@ class Asset extends Component {
                 showResult: true,
                 assetId: assetId
             })
-            console.log("Asset ID:" + assetId);
-        }).catch(console.log);
+        }).catch((errMsg) => {
+            this.setState({
+                isTxLoading: false,
+                showError: true,
+                errMsg: "Error:" + errMsg
+            })
+        });
     }
 
     render() {
@@ -166,7 +137,10 @@ class Asset extends Component {
                                     {this.state.isLoading ? "Creating..." : "Create Asset"}
                                 </Button>
                             </Form>
-                            {this.state.showResult ? <p>Asset ID: <a href={"https://testnet.algoexplorer.io/asset/"+this.state.assetId} target="_blank" rel="noopener noreferrer">{this.state.assetId}</a></p> : null}
+                            <Container>
+                                {this.state.showResult ? <p>Asset ID: <a href={"https://testnet.algoexplorer.io/asset/" + this.state.assetId} target="_blank" rel="noopener noreferrer">{this.state.assetId}</a></p> : null}
+                                {this.state.showError ? this.state.errMsg : null}
+                            </Container>
                         </Col>
                     </Container>
                 </Jumbotron>

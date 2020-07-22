@@ -18,7 +18,7 @@ class App extends Component {
           <Container>
             <Row>
               <Col>
-                <h1>Welcome to Algorand Limit Order Demo</h1>
+                <h1>Welcome to Algorand React Demo</h1>
                 <p>
                   <Button
                     tag="a"
