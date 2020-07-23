@@ -14,29 +14,25 @@ const algodclient = new algosdk.Algod(token, server, port);
 // import the limit order contract template
 const limitTemplate = require("algosdk/src/logicTemplates/limitorder");
 
-// Structure for changing blockchain params
-const chainParams = {
-    fee: 0,
-    firstRound: 0,
-    lastRound: 0,
-    genID: "",
-    genHash: ""
-}
-
 // Utility function to update params from blockchain
 function getChainParams(algodclient) {
     var p = new Promise(function (resolve, reject) {
-        var cp = chainParams;
+        // Structure for changing blockchain params
+        var cp = {
+            fee: 0,
+            firstRound: 0,
+            lastRound: 0,
+            genID: "",
+            genHash: ""
+        }
         algodclient.getTransactionParams().then((params) => {
             cp.firstRound = params.lastRound;
             cp.lastRound = cp.firstRound + parseInt(1000);
             cp.genID = params.genesisID;
             cp.genHash = params.genesishashb64;
-            algodclient.suggestedFee().then((sfee) => {
-                cp.fee = sfee.fee;
-                resolve(cp);
-            }).catch((res) => { reject(res.text) });
-        }).catch((res) => { reject(res.text) });
+            cp.fee=params.fee;
+            resolve(cp);
+        }).catch((res) => { reject(res) });
     })
     return p;
 }
@@ -53,7 +49,7 @@ function waitForConfirmation(algodclient, txId) {
                     clearInterval(interval);
                     resolve("Transaction " + pendingInfo.tx + " confirmed in round " + pendingInfo.round);
                 }
-            }).catch((res) => { reject(res.text) });
+            }).catch(reject);
         }, 2000);
 
     });
@@ -65,6 +61,44 @@ function generateWallet() {
     var account = algosdk.generateAccount();
     var mnemonic = algosdk.secretKeyToMnemonic(account.sk);
     return { account, mnemonic }
+}
+
+// Function for sending payment transaction
+function sendPaymentTransaction(mnemonic, to, amount) {
+    var p = new Promise(function (resolve, reject) {
+        // recover the account from mnemonic
+        var account = algosdk.mnemonicToSecretKey(mnemonic);
+        // get chain parameters for sending transactions
+        getChainParams(algodclient).then((cp) => {
+            // construct the transaction
+            var txn = {
+                "to": to,
+                "fee": cp.fee,
+                "amount": parseInt(amount),
+                "firstRound": cp.firstRound,
+                "lastRound": cp.lastRound,
+                "genesisID": cp.genID,
+                "genesisHash": cp.genHash,
+                "closeRemainderTo": undefined,
+                "note": undefined
+            };
+            // sign the transaction
+            var signedTxn = algosdk.signTransaction(txn, account.sk);
+            // submit the transaction
+            algodclient.sendRawTransaction(signedTxn.blob).then((tx) => {
+                // wait for transaction to be confirmed
+                waitForConfirmation(algodclient, tx.txId).then((msg) => {
+                    console.log(msg);
+                    // retrieve the transaction information
+                    algodclient.pendingTransactionInformation(tx.txId).then((ptx) => {
+                        // return the transaction ID
+                        resolve(ptx.tx);
+                    }).catch(reject);
+                }).catch(reject);
+            }).catch(reject);
+        }).catch(reject);
+    })
+    return p;
 }
 
 // Function for sending an asset creation transaction
@@ -98,57 +132,17 @@ function createAsset(mnemonic, defaultFrozen, decimals, totalIssuance, unitName,
             let rawSignedTxn = txn.signTxn(account.sk);
             // submit the transaction to the network
             algodclient.sendRawTransaction(rawSignedTxn).then((tx) => {
-                console.log("Transaction ID:" + tx.txId)
                 // wait for transaction to be confirmed
                 waitForConfirmation(algodclient, tx.txId).then((msg) => {
                     console.log(msg);
                     // retrieve the transaction information
                     algodclient.pendingTransactionInformation(tx.txId).then((ptx) => {
-                        console.log("Asset ID:" + ptx.txresults.createdasset);
                         // return the asset ID
                         resolve(ptx.txresults.createdasset);
-                    }).catch((res) => { reject(res.text) });
+                    }).catch(reject);
                 }).catch(reject);
-            }).catch((res) => { reject(res.text) });
-        }).catch((res) => { reject(res.text) });
-    })
-    return p;
-}
-
-// Function for sending payment transaction
-function sendPaymentTransaction(mnemonic, to, amount) {
-    var p = new Promise(function (resolve, reject) {
-        // recover the account from mnemonic
-        var account = algosdk.mnemonicToSecretKey(mnemonic);
-        // get chain parameters for sending transactions
-        getChainParams(algodclient).then((cp) => {
-            // construct the transaction
-            var txn = {
-                "to": to,
-                "fee": cp.fee,
-                "amount": parseInt(amount),
-                "firstRound": cp.firstRound,
-                "lastRound": cp.lastRound,
-                "genesisID": cp.genID,
-                "genesisHash": cp.genHash,
-                "closeRemainderTo": undefined,
-                "note": undefined
-            };
-            // sign the transaction
-            var signedTxn = algosdk.signTransaction(txn, account.sk);
-            // submit the transaction
-            algodclient.sendRawTransaction(signedTxn.blob).then((tx) => {
-                // wait for transaction to be confirmed
-                waitForConfirmation(algodclient, tx.txId).then((msg) => {
-                    console.log(msg);
-                    // retrieve the transaction information
-                    algodclient.pendingTransactionInformation(tx.txId).then((ptx) => {
-                        // return the transaction ID
-                        resolve(tx.txId);
-                    }).catch((res) => { reject(res.text) });
-                }).catch(reject);
-            }).catch((res) => { reject(res.text) });
-        }).catch((res) => { reject(res.text) });
+            }).catch(reject);
+        }).catch(reject);
     })
     return p;
 }
@@ -184,18 +178,17 @@ function sendAssetTransaction(mnemonic, to, assetID, amount) {
             var rawSignedTxn = opttxn.signTxn(account.sk);
             // submit the transaction to the network
             algodclient.sendRawTransaction(rawSignedTxn).then((tx) => {
-                console.log("Transaction ID: " + tx.txId);
                 // wait for transaction to be confirmed
                 waitForConfirmation(algodclient, tx.txId).then((msg) => {
                     console.log(msg);
                     // retrieve the transaction information
                     algodclient.pendingTransactionInformation(tx.txId).then((ptx) => {
                         // return the transaction ID
-                        resolve(tx.txId);
-                    }).catch((res) => { reject(res.text) });
+                        resolve(ptx.tx);
+                    }).catch(reject);
                 }).catch(reject);
-            }).catch((res) => { reject(res.text) });
-        }).catch((res) => { reject(res.text) });;
+            }).catch(reject);
+        }).catch(reject);;
     })
     return p;
 }
@@ -234,9 +227,9 @@ function createLimitOrder(mnemonic, assetID, assetAmount, algoAmount, minTrade) 
     return contract;
 }
 
-function sendLimitOrderSwapAssetsTx(mnemonic, assetAmount, algoAmount,contract) {
+function sendLimitOrderSwapAssetsTx(mnemonic, assetAmount, algoAmount, contract) {
     var p = new Promise((resolve, reject) => {
-// recover the account from mnemonic
+        // recover the account from mnemonic
         var account = algosdk.mnemonicToSecretKey(mnemonic);
 
         // Get the relevant params from the algod for the network
@@ -257,15 +250,14 @@ function sendLimitOrderSwapAssetsTx(mnemonic, assetAmount, algoAmount,contract) 
             algodclient.sendRawTransaction(txnBytes).then((tx) => {
                 // wait for transaction to be confirmed 
                 waitForConfirmation(algodclient, tx.txId).then((msg) => {
-                    console.log(msg);
                     // retrieve the transaction information
                     algodclient.pendingTransactionInformation(tx.txId).then((ptx) => {
                         // return the transaction ID
-                        resolve(tx.txId);
-                    }).catch((res) => { reject(res.text) });
+                        resolve(ptx.tx);
+                    }).catch(reject);
                 }).catch(reject);
-            }).catch((res) => { reject(res.text) });
-        }).catch((res) => { reject(res.text) });
+            }).catch(reject);
+        }).catch(reject);
     })
     return p;
 }
