@@ -34,8 +34,8 @@ class TransactionASA extends Component {
         algo.sendAssetTransaction(
             event.target.accountMnemonic.value,
             event.target.toAddress.value,
-            event.target.assetID.value,
-            event.target.amount.value
+            Number(event.target.assetID.value),
+            Number(event.target.amount.value)
         ).then((txId) => {
             this.setState({
                 isLoading: false,

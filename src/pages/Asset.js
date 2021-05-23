@@ -33,11 +33,15 @@ class Asset extends Component {
         this.setState({
             isLoading: true
         })
+        let defaultFrozen = false;
+        if (event.target.defaultFrozen.value === "yes") {
+            defaultFrozen = true;
+        }
         algo.createAsset(
             event.target.accountMnemonic.value,
-            event.target.defaultFrozen.value,
-            event.target.decimals.value,
-            event.target.totalIssuance.value,
+            defaultFrozen,
+            Number(event.target.decimals.value),
+            Number(event.target.totalIssuance.value),
             event.target.unitName.value,
             event.target.assetName.value,
             event.target.assetUrl.value,

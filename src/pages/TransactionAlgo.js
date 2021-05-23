@@ -36,7 +36,7 @@ class TransactionAlgo extends Component {
         algo.sendPaymentTransaction(
             event.target.accountMnemonic.value,
             event.target.toAddress.value,
-            event.target.amount.value
+            Number(event.target.amount.value)
         ).then((txId) => {
             this.setState({
                 isLoading: false,

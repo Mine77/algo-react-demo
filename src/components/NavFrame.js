@@ -48,9 +48,9 @@ class NavFrame extends Component {
                 <DropdownItem href="/transaction-asa">ASA Transaction</DropdownItem>
               </DropdownMenu>
             </Dropdown>
-            <NavItem>
+            {/* <NavItem>
               <NavLink href="/limit-order">Limit Order</NavLink>
-            </NavItem>
+            </NavItem> */}
           </Nav>
         </Navbar>
       </div>
